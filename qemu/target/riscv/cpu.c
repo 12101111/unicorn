@@ -57,6 +57,12 @@ static void set_priv_version(CPURISCVState *env, int priv_ver)
     env->priv_ver = priv_ver;
 }
 
+static void set_bext_version(CPURISCVState *env, int bext_ver)
+{
+    env->bext_ver = bext_ver;
+}
+
+
 static void set_feature(CPURISCVState *env, int feature)
 {
     env->features |= (1ULL << feature);
@@ -70,7 +76,7 @@ static void set_resetvec(CPURISCVState *env, int resetvec)
 static void riscv_any_cpu_init(CPUState *obj)
 {
     CPURISCVState *env = &RISCV_CPU(obj)->env;
-    set_misa(env, RVXLEN | RVI | RVM | RVA | RVF | RVD | RVC | RVU);
+    set_misa(env, RVXLEN | RVI | RVM | RVA | RVF | RVD | RVC | RVB | RVU);
     set_priv_version(env, PRIV_VERSION_1_11_0);
     set_resetvec(env, DEFAULT_RSTVEC);
 }
@@ -192,6 +198,7 @@ static void riscv_cpu_realize(struct uc_struct *uc, CPUState *dev)
     RISCVCPU *cpu = RISCV_CPU(dev);
     CPURISCVState *env = &cpu->env;
     int priv_version = PRIV_VERSION_1_11_0;
+    int bext_version = BEXT_VERSION_0_93_0;
     target_ulong target_misa = 0;
 
     cpu_exec_realizefn(cs);
@@ -210,6 +217,7 @@ static void riscv_cpu_realize(struct uc_struct *uc, CPUState *dev)
     }
 
     set_priv_version(env, priv_version);
+    set_bext_version(env, bext_version);
     set_resetvec(env, DEFAULT_RSTVEC);
 
     if (cpu->cfg.mmu) {
@@ -273,6 +281,9 @@ static void riscv_cpu_realize(struct uc_struct *uc, CPUState *dev)
         }
         if (cpu->cfg.ext_h) {
             target_misa |= RVH;
+        }
+        if (cpu->cfg.ext_b) {
+            target_misa |= RVB;
         }
 
         set_misa(env, RVXLEN | target_misa);
@@ -343,12 +354,12 @@ RISCVCPU *cpu_riscv_init(struct uc_struct *uc)
 
 #ifdef TARGET_RISCV32
     if (uc->cpu_model == INT_MAX) {
-        uc->cpu_model = UC_CPU_RISCV32_SIFIVE_U34;
+        uc->cpu_model = UC_CPU_RISCV32_BASE32;
     }
 #else
     /* TARGET_RISCV64 */
     if (uc->cpu_model == INT_MAX) {
-        uc->cpu_model = UC_CPU_RISCV64_SIFIVE_U54;
+        uc->cpu_model = UC_CPU_RISCV64_BASE64;
     }
 #endif
 
@@ -378,6 +389,7 @@ RISCVCPU *cpu_riscv_init(struct uc_struct *uc)
     cpu->cfg.ext_f = true;
     cpu->cfg.ext_d = true;
     cpu->cfg.ext_c = true;
+    cpu->cfg.ext_b = true;
     cpu->cfg.ext_s = true;
     cpu->cfg.ext_u = true;
     cpu->cfg.ext_h = false;

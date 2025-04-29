@@ -1022,6 +1022,7 @@ if(UNICORN_HAS_RISCV)
 add_library(riscv32-softmmu STATIC
     ${UNICORN_ARCH_COMMON}
 
+    qemu/target/riscv/bitmanip_helper.c
     qemu/target/riscv/cpu.c
     qemu/target/riscv/cpu_helper.c
     qemu/target/riscv/csr.c

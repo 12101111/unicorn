@@ -269,57 +269,17 @@ static bool trans_andi(DisasContext *ctx, arg_andi *a)
 }
 static bool trans_slli(DisasContext *ctx, arg_slli *a)
 {
-    TCGContext *tcg_ctx = ctx->uc->tcg_ctx;
-    if (a->shamt >= TARGET_LONG_BITS) {
-        return false;
-    }
-
-    if (a->rd != 0) {
-        TCGv t = tcg_temp_new(tcg_ctx);
-        gen_get_gpr(tcg_ctx, t, a->rs1);
-
-        tcg_gen_shli_tl(tcg_ctx, t, t, a->shamt);
-
-        gen_set_gpr(tcg_ctx, a->rd, t);
-        tcg_temp_free(tcg_ctx, t);
-    } /* NOP otherwise */
-    return true;
+    return gen_shifti(ctx, a, tcg_gen_shl_tl);
 }
 
 static bool trans_srli(DisasContext *ctx, arg_srli *a)
 {
-    TCGContext *tcg_ctx = ctx->uc->tcg_ctx;
-    if (a->shamt >= TARGET_LONG_BITS) {
-        return false;
-    }
-
-    if (a->rd != 0) {
-        TCGv t = tcg_temp_new(tcg_ctx);
-        gen_get_gpr(tcg_ctx, t, a->rs1);
-
-        tcg_gen_shri_tl(tcg_ctx, t, t, a->shamt);
-        gen_set_gpr(tcg_ctx, a->rd, t);
-        tcg_temp_free(tcg_ctx, t);
-    } /* NOP otherwise */
-    return true;
+    return gen_shifti(ctx, a, tcg_gen_shr_tl);
 }
 
 static bool trans_srai(DisasContext *ctx, arg_srai *a)
 {
-    TCGContext *tcg_ctx = ctx->uc->tcg_ctx;
-    if (a->shamt >= TARGET_LONG_BITS) {
-        return false;
-    }
-
-    if (a->rd != 0) {
-        TCGv t = tcg_temp_new(tcg_ctx);
-        gen_get_gpr(tcg_ctx, t, a->rs1);
-
-        tcg_gen_sari_tl(tcg_ctx, t, t, a->shamt);
-        gen_set_gpr(tcg_ctx, a->rd, t);
-        tcg_temp_free(tcg_ctx, t);
-    } /* NOP otherwise */
-    return true;
+    return gen_shifti(ctx, a, tcg_gen_sar_tl);
 }
 
 static bool trans_add(DisasContext *ctx, arg_add *a)
@@ -387,17 +347,7 @@ static bool trans_addiw(DisasContext *ctx, arg_addiw *a)
 
 static bool trans_slliw(DisasContext *ctx, arg_slliw *a)
 {
-    TCGContext *tcg_ctx = ctx->uc->tcg_ctx;
-    TCGv source1;
-    source1 = tcg_temp_new(tcg_ctx);
-    gen_get_gpr(tcg_ctx, source1, a->rs1);
-
-    tcg_gen_shli_tl(tcg_ctx, source1, source1, a->shamt);
-    tcg_gen_ext32s_tl(tcg_ctx, source1, source1);
-    gen_set_gpr(tcg_ctx, a->rd, source1);
-
-    tcg_temp_free(tcg_ctx, source1);
-    return true;
+    return gen_shiftiw(ctx, a, tcg_gen_shl_tl);
 }
 
 static bool trans_srliw(DisasContext *ctx, arg_srliw *a)
