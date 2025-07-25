@@ -586,6 +586,12 @@ EX_SH(12)
     }                              \
 } while (0)
 
+#ifdef TARGET_RISCV64
+#define REQUIRE_32BIT(ctx) return false
+#else
+#define REQUIRE_32BIT(ctx)
+#endif
+
 static int ex_rvc_register(DisasContext *ctx, int reg)
 {
     return 8 + reg;
@@ -739,10 +745,50 @@ static bool gen_shift(DisasContext *ctx, arg_r *a,
     return true;
 }
 
+static bool gen_shifti(DisasContext *ctx, arg_shift *a,
+                       void(*func)(TCGContext *, TCGv, TCGv, TCGv))
+{
+    TCGContext *tcg_ctx = ctx->uc->tcg_ctx;
+
+    if (a->shamt >= TARGET_LONG_BITS) {
+        return false;
+    }
+
+    TCGv source1 = tcg_temp_new(tcg_ctx);
+    TCGv source2 = tcg_temp_new(tcg_ctx);
+
+    gen_get_gpr(tcg_ctx, source1, a->rs1);
+
+    tcg_gen_movi_tl(tcg_ctx, source2, a->shamt);
+    (*func)(tcg_ctx, source1, source1, source2);
+
+    gen_set_gpr(tcg_ctx, a->rd, source1);
+    tcg_temp_free(tcg_ctx, source1);
+    tcg_temp_free(tcg_ctx, source2);
+    return true;
+}
+
+static bool gen_unary(DisasContext *ctx, arg_r2 *a,
+                      void(*func)(TCGContext *, TCGv, TCGv))
+{
+    TCGContext *tcg_ctx = ctx->uc->tcg_ctx;
+
+    TCGv source = tcg_temp_new(tcg_ctx);
+
+    gen_get_gpr(tcg_ctx, source, a->rs1);
+
+    (*func)(tcg_ctx, source, source);
+
+    gen_set_gpr(tcg_ctx, a->rd, source);
+    tcg_temp_free(tcg_ctx, source);
+    return true;
+}
+
 /* Include insn module translation function */
 #include "insn_trans/trans_rvi.inc.c"
 #include "insn_trans/trans_rvm.inc.c"
 #include "insn_trans/trans_rva.inc.c"
+#include "insn_trans/trans_rvb.inc.c"
 #include "insn_trans/trans_rvf.inc.c"
 #include "insn_trans/trans_rvd.inc.c"
 #include "insn_trans/trans_rvh.inc.c"

@@ -1412,6 +1412,17 @@ uint64_t dup_const_func(unsigned vece, uint64_t c);
 #define dup_const(VECE, C) dup_const_func(VECE, C)
 #endif
 
+#if TARGET_LONG_BITS == 64
+# define dup_const_tl  dup_const
+#else
+# define dup_const_tl(VECE, C)                                     \
+    (__builtin_constant_p(VECE)                                    \
+     ? (  (VECE) == MO_8  ? 0x01010101ul * (uint8_t)(C)            \
+        : (VECE) == MO_16 ? 0x00010001ul * (uint16_t)(C)           \
+        : (VECE) == MO_32 ? 0x00000001ul * (uint32_t)(C)           \
+        : dup_const_func(VECE, C))                    \
+     :  (target_long)dup_const_func(VECE, C))
+#endif
 
 /*
  * Memory helpers that will be used by TCG generated code.

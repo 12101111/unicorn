@@ -370,12 +370,12 @@ RISCVCPU *cpu_riscv_init(struct uc_struct *uc)
 
 #ifdef TARGET_RISCV32
     if (uc->cpu_model == INT_MAX) {
-        uc->cpu_model = UC_CPU_RISCV32_SIFIVE_U34;
+        uc->cpu_model = UC_CPU_RISCV32_BASE;
     }
 #else
     /* TARGET_RISCV64 */
     if (uc->cpu_model == INT_MAX) {
-        uc->cpu_model = UC_CPU_RISCV64_SIFIVE_U54;
+        uc->cpu_model = UC_CPU_RISCV64_BASE;
     }
 #endif
 

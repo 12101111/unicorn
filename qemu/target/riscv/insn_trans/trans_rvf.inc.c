@@ -40,11 +40,11 @@ static void gen_nanbox_fpr(DisasContext *ctx, int regno)
 
 static bool trans_flw(DisasContext *ctx, arg_flw *a)
 {
+    REQUIRE_FPU;
+    REQUIRE_EXT(ctx, RVF);
     TCGContext *tcg_ctx = ctx->uc->tcg_ctx;
     TCGv t0 = tcg_temp_new(tcg_ctx);
     gen_get_gpr(tcg_ctx, t0, a->rs1);
-    REQUIRE_FPU;
-    REQUIRE_EXT(ctx, RVF);
     tcg_gen_addi_tl(tcg_ctx, t0, t0, a->imm);
 
     tcg_gen_qemu_ld_i64(tcg_ctx, tcg_ctx->cpu_fpr[a->rd], t0, ctx->mem_idx, MO_TEUL);
@@ -57,12 +57,12 @@ static bool trans_flw(DisasContext *ctx, arg_flw *a)
 
 static bool trans_fsw(DisasContext *ctx, arg_fsw *a)
 {
+    REQUIRE_FPU;
+    REQUIRE_EXT(ctx, RVF);
     TCGContext *tcg_ctx = ctx->uc->tcg_ctx;
     TCGv t0 = tcg_temp_new(tcg_ctx);
     gen_get_gpr(tcg_ctx, t0, a->rs1);
 
-    REQUIRE_FPU;
-    REQUIRE_EXT(ctx, RVF);
     tcg_gen_addi_tl(tcg_ctx, t0, t0, a->imm);
 
     tcg_gen_qemu_st_i64(tcg_ctx, tcg_ctx->cpu_fpr[a->rs2], t0, ctx->mem_idx, MO_TEUL);
