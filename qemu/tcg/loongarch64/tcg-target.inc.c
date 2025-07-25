@@ -32,6 +32,8 @@
 #include "../tcg-ldst.inc.c"
 #include <asm/hwcap.h>
 
+bool use_lsx_instructions;
+
 #ifdef CONFIG_DEBUG_TCG
 static const char * const tcg_target_reg_names[TCG_TARGET_NB_REGS] = {
     "zero",
@@ -2602,10 +2604,10 @@ static void tcg_target_init(TCGContext *s)
     }
 
     if (hwcap & HWCAP_LOONGARCH_LSX) {
-        s->use_lsx_instructions = 1;
+        use_lsx_instructions = 1;
     }
 #else
-    s->use_lsx_instructions = 1;
+    use_lsx_instructions = 1;
 #endif
 
     s->tcg_target_available_regs[TCG_TYPE_I32] = ALL_GENERAL_REGS;

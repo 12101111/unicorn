@@ -1282,6 +1282,10 @@ impl<'a, D> Unicorn<'a, D> {
             Arch::S390X => Ok(RegisterS390X::PC as i32),
             #[cfg(feature = "arch_tricore")]
             Arch::TRICORE => Ok(RegisterTRICORE::PC as i32),
+            #[cfg(feature = "arch_avr")]
+            Arch::AVR => Ok(RegisterAVR::PC as i32),
+            #[cfg(feature = "arch_rh850")]
+            Arch::RH850 => Ok(RegisterRH850::PC as i32),
             // returns `uc_error::ARCH` for `Arch::MAX`, and any
             // other architecture that are not compiled in
             _ => Err(uc_error::ARCH),
